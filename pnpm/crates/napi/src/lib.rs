@@ -63,12 +63,13 @@ pub fn engine_version() -> &'static str {
     pnpm_config::PNPM_VERSION
 }
 
-/// Honor the same `TRACE` env var the pacquet CLI honors: an addon
-/// embedded in a Node host has no `main` of its own, so the subscriber
-/// is installed when the module loads.
+/// Honor the same `TRACE` env var the pacquet CLI honors and configure rayon's
+/// thread pool: an addon embedded in a Node host has no `main` of its own, so
+/// the subscriber is installed and the pool is sized when the module loads.
 #[napi_derive::module_init]
-fn init_tracing() {
+fn init_module() {
     pnpm_diagnostics::enable_tracing_by_env();
+    pnpm_package_manager::configure_rayon_pool();
 }
 
 /// No-op stubs for the napi runtime symbols the `#[napi]` trampolines
@@ -76,3 +77,5 @@ fn init_tracing() {
 /// self-contained. See the module for the full rationale.
 #[cfg(test)]
 mod napi_runtime_test_stubs;
+#[cfg(test)]
+mod tests;
